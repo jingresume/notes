@@ -143,3 +143,21 @@ Widget& operator=(const Widget& rhs)
 + 促进正确使用的办法包括：接口一致性、与内置类型行为兼用等
 + 防止误用的办法包括：建立新的类型、限制类型上的操作、束缚对象值、以及消除对象的资源管理责任
 + 以const修饰operator*的返回类型
+
+### item19 设计class犹如type
+
+### item20 用pass-by-reference-to-const替换pass-by-value
+
++ 尽量以pass-by-reference-to-const替换pass-by-value，前者通常比较高效，并且避免切割问题
++ 切割问题：当派生类按值传递给一个用基类做参数的函数时，传值过程中只会复制基类部分
++ 以上规则不适用于内置类型、迭代器、函数指针，习惯上他们都被设计为pass-by-value，且体积较小
+
+### item21 必须返回对象时，别妄想返回其reference
+
++ 绝不要返回pointer或reference指向的一个local对象、或者heap对象
++ 带来的麻烦会比收益小，且一般编译器会有返回值优化
+
+### item22 将成员变量声明为private
+
++ 将成员变量声明为private，这赋予了用户访问数据的一致性、可细微划分访问控制、允许约束条件获得保证、提供给class的作者充分的实现弹性，为后期的维护升级提供方便。
++ protected并不比public更具封装性，一个是对子类开放，一个是对用户开放，都没有封装数据。
