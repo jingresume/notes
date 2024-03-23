@@ -161,3 +161,58 @@ Widget& operator=(const Widget& rhs)
 
 + 将成员变量声明为private，这赋予了用户访问数据的一致性、可细微划分访问控制、允许约束条件获得保证、提供给class的作者充分的实现弹性，为后期的维护升级提供方便。
 + protected并不比public更具封装性，一个是对子类开放，一个是对用户开放，都没有封装数据。
+
+### item23 以no-member/no-friend替换member函数
+
++ 当一个功能，既可以用no-member函数实现，又可以用member函数实现时，倾向于选择no-member函数
++ 因为no-member函数有更好的封装性 -- no member不可访问成员变量，所以封装性更好
++ 一个类可能拥有大量的便利函数，而用户可能只对其中某一部分感兴趣，如果这些便利函数时使用no-member的形式，那么我们可以将它们分为多个头文件。降低编译依赖性。在class内的member函数是无法分离的。
+
+### item24 如果所有函数参数都需要类型转换，请为此采用no-member函数
+
++ 主要针对操作法重载  
+如果操作法重载使用member函数，则只有乘法*右边的参数可以进行隐式类型转换  
+
+```C++
+class Ration
+{
+public:
+    Ration(int a);
+    const Ration operator* (const Ration& rhs)
+    {
+        return Ration(this->a * rhs->getA());
+    }
+private:
+    int a;
+}
+
+```
+
+```C++
+Ration a(1);
+Ration b = a * 1; // a.*(1)
+Ration b = 1 * a; // 1.*(a)无法通过编译，因为1在*左边，不在操作符重载的参数列表中，所以无法隐式类型转换
+```
+
+此时我们就需要将操作符重载用non-member实现
+
+```C++
+const Ration operation* (const Ration& lhs, const Ration& rhs)
+{
+    return Ration(lhs->getA() * rhs->getA());
+}
+```
+
++ 如果不需要访问私有成员，我们也不必将non-member声明为friend
+
+### item25 考虑写出一个不抛出异常的swap函数
+
++ 当std::swap的默认实现，对于自定义的class效率不高时，提供一个swap成员函数，并确定这个函数不抛出异常
++ 如果你提供一个member swap函数，也该提供一个non member swap函数来调用他；对于class（非template）请特化std::swap，并在特化版本中调用member swap
++ 调用swap时，应该针对std::swap使用using声明式，然后调用swap时，不使用任何namespace，这样编译器才能找到正确的版本
++ swap的一个重要应用是，帮助class提供强烈的异常安全性保障，所以要求swap成员函数不抛出异常
+
+```C++
+using std::swap
+swap(obj1, obj2);
+```
