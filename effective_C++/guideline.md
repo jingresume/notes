@@ -318,3 +318,80 @@ class Derived : public Base
     void f3();
 }
 ```
+
+### item34 区分接口继承和实现继承
+
++ 成员函数的接口总是会被继承
++ 声明non-virtual函数的目的是：为了让devired class继承函数的接口和一份强制实现（不应该在子类中重新定义）
++ 声明非纯虚函数的目的是：为了让devired class继承函数的接口和default实现
++ 声明纯虚函数的目的是：为了让devired class只继承函数的接口
++ 基类也可以为纯虚函数提供一份default实现，但是必须在子类中显式调用Base::f1()
+
+### item35 考虑virtual函数以外的其他选择
+
++ NVI: Non-Virtual Interface，用public non-virtual包裹低访问性的virtual函数。  
+    1 将接口声明为non-Virtual函数  
+    2 在接口中调用private virtual函数  
+    3 这是template method设计模式的一种表现
++ 使用函数指针替换virtual函数  
+    1 对象不同的实例可以拥有不同的计算函数  
+    2 可在运行期间改变计算函数  
+    3 必须降低对象的封装性（函数指针需要访问内部变量）
+    4 这是策略模式的一种表现
+
+### item36 绝不重新定义继承而来的non-virtual函数
+
++ non-virtual函数是静态绑定、virtual函数是动态绑定
++ 如果重写了继承来的non-virtual函数，则通过基类指针调用这个函数和通过子类指针调用会有不一样的结果
+
+### item37 绝不重新定义继承而来的缺省参数值
+
++ virtual函数是动态绑定，但是缺省参数是静态绑定
++ 如果重新定义继承而来的缺省参数值，在使用基类指针调用时，重新定义的缺省参数无效
+
+### item38 通过复合塑膜出has-a或“根据某物实现出“
+
++ 复合是类型之间的一种关系，当某种对象内含它种对象时，就是这种关系
++ 在应用域，复合意味着has-a
++ 在实现域，复合意味着根据某物实现出
+
+### item39 明智而审慎的使用private继承
+
++ private继承，从base class继承来的所有成员，都会变成private成员
++ 编译器不会自动将derived class自动转换为base class
++ private继承，意味着根据某物实现，只有实现部分被继承，接口应略去
++ 如果D private继承B，意味着D对象根据B对象实现而得
++ C++裁定，凡是独立对象，都必须有非零大小
+
+```C++
+class empty {} // sizeof(empty) != 0
+```
+
++ private继承意味着根据某物实现，复合也表示同样的意思，优先选择复合；但是当derived class需要访问protected base class成员、或者要重新定义virtual函数时，使用private继承是合理的。
++ private继承可以造成empty class最优化，因为被继承得empty class不再是一个独立的对象。
+
+### item40 明智而审慎的使用多重继承
+
++ 多重继承容易导致歧义：多个基类中拥有同样的函数
++ 棱形继承：使用virtual继承来避免成员变量重复
++ 多重继承有正当用途，例如需要同时实现两个接口
+
+## 模板与范型编程
+
+### item41 了解隐式接口和编译期多态
+
+```C++
+template <typename T>
+void doProcessing(T& w)
+{
+    if (w.size() > 10)
+    {
+        T temp(w);
+        temp.normalize();
+        temp.swap(w);
+    }
+}
+```
+
++ 上述模板中的w的类型，必须支持normalize、size、swap等接口，这便是T必须支持的**隐式接口**
++ 以不同的模板参数实例化函数模板，会导致调用不同的函数，这便是**编译期多态**
