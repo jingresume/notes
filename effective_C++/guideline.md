@@ -395,3 +395,93 @@ void doProcessing(T& w)
 
 + 上述模板中的w的类型，必须支持normalize、size、swap等接口，这便是T必须支持的**隐式接口**
 + 以不同的模板参数实例化函数模板，会导致调用不同的函数，这便是**编译期多态**
+
+### item42 了解typename的双重含义
+
+```C++
+template <typename T>
+void print2nd(const T& container)
+{
+    typename T::const_iterator x;
+    cout << *x << endl;
+}
+```
+
++ 嵌套从属名称，从属名称指在模版中与模板参数相关的名称，如果从属名称在class中呈嵌套状，就称为嵌套从属名称。
++ 如果解析器在template中遇到一个嵌套从属名称，它便假设这个名称不是类型，除非你告诉他是。
++ 告诉编译器的方法就是在嵌套从属名称前加上typename
++ 声明template参数时，前缀关键字class和typename可以互换
+
+### item43 学习处理模板化基类内的名称
+
++ C++拒绝在模板化基类内寻找继承而来的名称
+
+```C++
+template <typename T>
+class Base
+{
+public:
+    void send(const string& msg)
+    {
+        T.send(msg);
+    }
+}
+
+template <typename T>
+class Derived : public Base<T>
+{
+public:
+    void sendMsg(const string& msg)
+    {
+        send(msg); // C++不会去模版化的基类中寻找send，所以会编译失败
+    }
+}
+```
+
++ 可在devired class中使用this->指设base class template的成员或名称，或者使用using声明式 声明base class的名称
+
+### item44 将与参数无关的代码抽离template
+
++ 与参数无关的代码，会造成代码膨胀
++ 因非类型参数造成的代码膨胀，往往可以消除，通过用函数参数或者class成员变量替换参数
++ 因类型参数造成的代码膨胀，往往可以降低，通过让二进制表述完全相同的具体类型，共享实现码
+
+### item45 运用成员函数模板接受所有兼容类型
+
++ 使用成员函数模板，生成“可接受所有兼容类型的”函数
++ 如果你用成员函数模板声明了用于泛化的copy构造和赋值操作，你还需要声明正常的copy构造和赋值操作
+
+### item46 需要类型转换时，请为模板定义非成员函数
+
++ template推倒过程中，并不考虑采纳通过构造函数而发生的隐式类型转换。
++ 如果需要class template中，与参数template相关的函数能提供隐式类型转换，那么请将这些函数定义为class template内部的friend函数
+
+### item47 请使用trait class表现类型信息
+
++ Trait class使得类型信息在编译期可用，它们通过template和特化实现。
++ 利用函数重载，trait class可以在编译器对对象进行if...else判断
+
+```C++
+template <typename IterT>
+void doAdvance(IterT& iter, std::random_access_iterator_tag)
+{
+
+}
+
+template <typename IterT>
+void doAdvance(IterT& iter, std::forward_iterator_tag)
+{
+
+}
+
+template <typename IterT>
+void advance(IterT& iter)
+{
+    doAvance(iter, typename std::iterator_traits<IterT>::iterator_category());
+}
+```
+
+### item48 认识template元编程
+
++ 模板元编程：以C++编写，执行于C++编译器中的呈现
++ 模版元编程可以将工作从运行期移往编译期，因而可以实现早期错误侦测和更高的执行效率
