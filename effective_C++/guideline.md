@@ -485,3 +485,40 @@ void advance(IterT& iter)
 
 + 模板元编程：以C++编写，执行于C++编译器中的呈现
 + 模版元编程可以将工作从运行期移往编译期，因而可以实现早期错误侦测和更高的执行效率
+
+## 定制new和delete
+
+### item49 了解new-handler的行为
+
++ set_new_handler允许客户指定一个函数，在内存分配失败时被调用，该设置是全局的
++ 当operator new无法满足内存申请时，他会不断调用new-handler函数，直到找到足够内存
++ CRTP：怪异的循环模板模式，子类继承模板基类，模板基类的模板参数是子类
+
+### item50 了解new和delete的合理替换时机
+
++ 替换编译器提供的new delete的原因主要有  
+    1）用来检测运用上的错误（asan）  
+    2）为了强化性能  
+    3）为了收集使用上的统计数据  
+
+### item51 编写new和delete时需要固守常规
+
++ C++保证删除null指针永远安全
++ operator new应该包含一个无穷循环，并在其中尝试分配内存，如果无法满足内存需求，就调用new-handler。
+
+### item52 写了placement new也要写placement delete
+
++ 当operator new或operator delete函数中出现额外参数时，这两个函数被称为placement new/placement delete
++ 当你调用placement new申请内存成功后，如果在构造函数中抛出异常，编译器会寻找对应的placement delete释放内存，如果找不到，什么也不做，导致内存泄露
++ 当你声明placement new/placement delete时，不要无意识遮盖它们的正常版本
+
+## 杂项讨论
+
+### item53 不要轻易忽略编译器警告
+
+### item54 让自己熟悉包括TR1在内的标准程序库
+
++ TR1添加了智能指针、函数对象、正则表达式等，对于后面的C++11
++ TR1自身只是一份规范，一个好的实物来源时Boost程序库
+
+### item55 让自己熟悉Boost
