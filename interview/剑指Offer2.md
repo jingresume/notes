@@ -254,3 +254,46 @@ c. 然后将左右子树继续递归处理，如果不满足上述性质，则�
 + Q34 二叉树中，和为某一值的路径
 
 递归+回溯
+
++ Q35 复杂链表的复制
+
+> 已阅
+
++ [Q36 二叉搜索树与双向链表](./Question/Q36_ConvertBST.cpp)
+
+> 将一颗二叉搜索树转换成有序的双向链表
+
+```C++
+void convert(BinaryTreeNode* pRoot, BinaryTreeNode** pLastNode)
+{
+    if (pRoot == nullptr) return;
+
+    BinaryTreeNode* pCurrentNode = pRoot;
+
+    if (pRoot->m_pLeft != nullptr) convert(pRoot->m_pLeft, pLastNode);
+
+    pCurrentNode->m_pLeft = *pLastNode;
+
+    if (*pLastNode != nullptr) (*pLastNode)->m_pLeft = pCurrentNode;
+
+    *pLastNode = pCurrentNode;
+
+    if (pRoot->m_pRight != nullptr) convert(pRoot->m_pRight, pLastNode);
+}
+```
+
++ Q37 序列化二叉树
+
+> 请实现两个函数用来实现序列化和反序列号二叉树，即将二叉树用字符串表示。
+
+a. 使用前序遍历+特殊符号表示空指针的方式进行序列化
+
++ Q38 字符串的排列
+
+> 输入一个字符串，输出该字符串中字符的所有排列
+
+a. 第一步求所有可能出现在第一个位置的字符，即把第一个字符和后面所有的字符交换。  
+b. 第二步固定第一个 字符，如图4. 18 (a )所示，求后面所有字符的排列。  
+c. 递归求解  
+
++ 思考题 八皇后问题
